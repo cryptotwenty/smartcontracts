@@ -1,1 +1,1 @@
-contract code reviewed - same as c20-truffle as at commit cddbd0d1242d99fc0ccb0599571660f93071bd66
+same as c20-truffle as at commit 2d6a2263c5e8b1903b4b13dfc87a55c7d3e32aae
