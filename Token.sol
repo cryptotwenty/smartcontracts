@@ -1,7 +1,5 @@
 pragma solidity 0.4.11;
 
-// TODO: update to ERC223 standard
-
 contract Token { // ERC20 standard
 
     function balanceOf(address _owner) constant returns (uint256 balance);
