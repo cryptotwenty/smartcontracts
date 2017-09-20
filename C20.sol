@@ -103,13 +103,6 @@ contract C20 is StandardToken {
         if (newNumerator > currentPrice.numerator) _;
     }
 
-    modifier only_if_bal_greater_equal (uint256 withdrawValue) {
-        if (this.balance >= withdrawValue) _;
-    }
-    modifier only_if_bal_less (uint256 withdrawValue) {
-        if (this.balance < withdrawValue) _;
-    }
-
     // CONSTRUCTOR
 
     function C20(address controlWalletInput, uint256 priceNumeratorInput, uint256 startBlockInput, uint256 endBlockInput) {
@@ -252,27 +245,28 @@ contract C20 is StandardToken {
         uint256 withdrawValue = safeMul(tokens, price.denominator) / price.numerator;
         // if contract ethbal > then send + transfer tokens to fundWallet, otherwise give tokens back
         withdrawals[investor].tokens = 0;
-        enact_withdrawal_less(investor, withdrawValue, tokens); // order is very important here
-        enact_withdrawal_greater_equal(investor, withdrawValue, tokens);
+        if (this.balance >= withdrawValue)
+            enact_withdrawal_greater_equal(investor, withdrawValue, tokens);
+        else
+            enact_withdrawal_less(investor, withdrawValue, tokens);
     }
 
-    function enact_withdrawal_less(address investor, uint256 withdrawValue, uint256 tokens)
-        private
-        only_if_bal_less(withdrawValue)
-    {
-        assert(this.balance < withdrawValue);
-        balances[investor] = safeAdd(balances[investor], tokens);
-        Withdraw(investor, tokens, 0); // indicate a failed withdrawal
-    }
     function enact_withdrawal_greater_equal(address investor, uint256 withdrawValue, uint256 tokens)
         private
-        only_if_bal_greater_equal(withdrawValue)
     {
         assert(this.balance >= withdrawValue);
         balances[fundWallet] = safeAdd(balances[fundWallet], tokens);
         investor.transfer(withdrawValue);
         Withdraw(investor, tokens, withdrawValue);
     }
+    function enact_withdrawal_less(address investor, uint256 withdrawValue, uint256 tokens)
+        private
+    {
+        assert(this.balance < withdrawValue);
+        balances[investor] = safeAdd(balances[investor], tokens);
+        Withdraw(investor, tokens, 0); // indicate a failed withdrawal
+    }
+
 
     function checkWithdrawValue(uint256 amountTokensToWithdraw) constant returns (uint256 etherValue) {
         require(amountTokensToWithdraw > 0);
