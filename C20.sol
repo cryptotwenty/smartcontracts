@@ -9,9 +9,9 @@ contract C20 is StandardToken {
     string public name = "Crypto20";
     string public symbol = "C20";
     uint256 public decimals = 18;
-    string public version = "8.0";
+    string public version = "9.0";
 
-    uint256 public tokenCap = 86206896 * 10**18; // possibly have tokenIssuanceCap and set to 75 mil
+    uint256 public tokenCap = 86206896 * 10**18;
 
     // crowdsale parameters
     uint256 public fundingStartBlock;
@@ -45,7 +45,7 @@ contract C20 is StandardToken {
     // maps previousUpdateTime to the next price
     mapping (uint256 => Price) public prices;
     // maps addresses
-    mapping (address => bool ) public whitelist;
+    mapping (address => bool) public whitelist;
 
     // TYPES
 
@@ -108,7 +108,6 @@ contract C20 is StandardToken {
     function C20(address controlWalletInput, uint256 priceNumeratorInput, uint256 startBlockInput, uint256 endBlockInput) {
         require(controlWalletInput != address(0));
         require(priceNumeratorInput > 0);
-        /*require(block.number <= startBlockInput);*/
         require(endBlockInput > startBlockInput);
         fundWallet = msg.sender;
         controlWallet = controlWalletInput;
@@ -131,7 +130,6 @@ contract C20 is StandardToken {
 
     // allows controlWallet to update the price within a time contstraint, allows fundWallet complete control
     function updatePrice(uint256 newNumerator) external onlyManagingWallets {
-        require(block.number > fundingEndBlock);
         require(newNumerator > 0);
         require_limited_change(newNumerator);
         // either controlWallet command is compliant or transaction came from fundWallet
@@ -303,13 +301,12 @@ contract C20 is StandardToken {
         waitTime = newWaitTime;
     }
 
-    // TODO: possibly remove
     function updateFundingStartBlock(uint256 newFundingStartBlock) external onlyFundWallet {
         require(block.number < fundingStartBlock);
         require(block.number < newFundingStartBlock);
         fundingStartBlock = newFundingStartBlock;
     }
-    // TODO: possibly remove
+
     function updateFundingEndBlock(uint256 newFundingEndBlock) external onlyFundWallet {
         require(block.number < fundingEndBlock);
         require(block.number < newFundingEndBlock);
@@ -328,9 +325,9 @@ contract C20 is StandardToken {
         tradeable = true;
     }
 
-    //fallback function
-    function() {
-        require(false); // do nothing
+    // fallback function
+    function() payable {
+        investTo(msg.sender);
     }
 
     function claimTokens(address _token) external onlyFundWallet {
