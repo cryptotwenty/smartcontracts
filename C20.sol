@@ -135,7 +135,7 @@ contract C20 is StandardToken {
         // either controlWallet command is compliant or transaction came from fundWallet
         currentPrice.numerator = newNumerator;
         // maps time to new Price (if not during ICO)
-        if (block.number > fundingEndBlock) {
+        if (block.number < fundingStartBlock || block.number > fundingEndBlock) {
             prices[previousUpdateTime] = currentPrice;
             previousUpdateTime = now;
         }
