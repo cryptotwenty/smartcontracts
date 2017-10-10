@@ -135,10 +135,8 @@ contract C20 is StandardToken {
         // either controlWallet command is compliant or transaction came from fundWallet
         currentPrice.numerator = newNumerator;
         // maps time to new Price (if not during ICO)
-        if (block.number < fundingStartBlock || block.number > fundingEndBlock) {
-            prices[previousUpdateTime] = currentPrice;
-            previousUpdateTime = now;
-        }
+        prices[previousUpdateTime] = currentPrice;
+        previousUpdateTime = now;
         PriceUpdate(newNumerator, currentPrice.denominator);
     }
 
@@ -209,12 +207,13 @@ contract C20 is StandardToken {
         Buy(msg.sender, participant, msg.value, tokensToBuy);
     }
 
+    // time based on blocknumbers, assuming a blocktime of 30s
     function icoDenominatorPrice() public constant returns (uint256) {
-        uint256 icoDuration = safeSub(now, previousUpdateTime);
+        uint256 icoDuration = safeSub(block.number, fundingStartBlock);
         uint256 denominator;
-        if (icoDuration < 24 hours) {
+        if (icoDuration < 2880) { // #blocks = 24*60*60/30 = 2880
             return currentPrice.denominator;
-        } else if (icoDuration < 4 weeks ) {
+        } else if (icoDuration < 80640 ) { // #blocks = 4*7*24*60*60/30 = 80640
             denominator = safeMul(currentPrice.denominator, 105) / 100;
             return denominator;
         } else {
@@ -329,6 +328,7 @@ contract C20 is StandardToken {
 
     // fallback function
     function() payable {
+        require(tx.origin == msg.sender);
         buyTo(msg.sender);
     }
 

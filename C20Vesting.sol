@@ -48,12 +48,6 @@
           ERC20Token = Token(_token);
       }
 
-      function updateToken(address tokenAddressInput) external {
-          require(tokenAddressInput != address(0));
-          require(msg.sender == beneficiary);
-          ERC20Token = Token(tokenAddressInput);
-      }
-
       function changeBeneficiary(address newBeneficiary) external {
           require(newBeneficiary != address(0));
           require(msg.sender == beneficiary);
@@ -122,5 +116,14 @@
           require(now > fourthRelease);
           ERC20Token.transfer(beneficiary, balance); // send remaining 25 % of team releases
       }
+
+      function claimOtherTokens(address _token) external {
+          require(msg.sender == beneficiary);
+          require(_token != address(0));
+          Token token = Token(_token);
+          require(token != ERC20Token);
+          uint256 balance = token.balanceOf(this);
+          token.transfer(beneficiary, balance);
+       }
 
    }
