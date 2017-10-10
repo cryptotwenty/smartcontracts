@@ -54,6 +54,13 @@
           beneficiary = newBeneficiary;
       }
 
+      function updateFundingEndBlock(uint256 newFundingEndBlock) {
+          require(msg.sender == beneficiary);
+          require(block.number < fundingEndBlock);
+          require(block.number < newFundingEndBlock);
+          fundingEndBlock = newFundingEndBlock;
+      }
+
       function checkBalance() constant returns (uint256 tokenBalance) {
           return ERC20Token.balanceOf(this);
       }
